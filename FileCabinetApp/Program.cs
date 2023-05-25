@@ -13,12 +13,14 @@
         private static Tuple<string, Action<string>>[] commands = new Tuple<string, Action<string>>[]
         {
             new Tuple<string, Action<string>>("help", PrintHelp),
+            new Tuple<string, Action<string>>("stat", Stat),
             new Tuple<string, Action<string>>("exit", Exit),
         };
 
         private static string[][] helpMessages = new string[][]
         {
             new string[] { "help", "prints the help screen", "The 'help' command prints the help screen." },
+            new string[] { "stat", "prints the number of records", "The 'stat' command prints the number of records." },
             new string[] { "exit", "exits the application", "The 'exit' command exits the application." },
         };
 
@@ -88,6 +90,13 @@
             }
 
             Console.WriteLine();
+        }
+
+        private static void Stat(string parameters)
+        {
+            var obj = new FileCabinetService();
+            var recordsCount = obj.GetStat();
+            Console.WriteLine($"{recordsCount} record(s).");
         }
 
         private static void Exit(string parameters)
