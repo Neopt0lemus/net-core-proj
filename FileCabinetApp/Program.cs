@@ -7,7 +7,7 @@
         private const int CommandHelpIndex = 0;
         private const int DescriptionHelpIndex = 1;
         private const int ExplanationHelpIndex = 2;
-
+        private static readonly FileCabinetService Service = new FileCabinetService();
         private static bool isRunning = true;
 
         private static Tuple<string, Action<string>>[] commands = new Tuple<string, Action<string>>[]
@@ -94,8 +94,7 @@
 
         private static void Stat(string parameters)
         {
-            var obj = new FileCabinetService();
-            var recordsCount = obj.GetStat();
+            var recordsCount = Service.GetStat();
             Console.WriteLine($"{recordsCount} record(s).");
         }
 
