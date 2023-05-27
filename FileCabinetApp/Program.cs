@@ -1,4 +1,7 @@
-﻿namespace FileCabinetApp
+﻿using System.Globalization;
+using System.Text;
+
+namespace FileCabinetApp
 {
     public static class Program
     {
@@ -7,18 +10,24 @@
         private const int CommandHelpIndex = 0;
         private const int DescriptionHelpIndex = 1;
         private const int ExplanationHelpIndex = 2;
-
+        private static readonly FileCabinetService Service = new FileCabinetService();
         private static bool isRunning = true;
 
         private static Tuple<string, Action<string>>[] commands = new Tuple<string, Action<string>>[]
         {
             new Tuple<string, Action<string>>("help", PrintHelp),
+            new Tuple<string, Action<string>>("stat", Stat),
+            new Tuple<string, Action<string>>("create", Create),
+            new Tuple<string, Action<string>>("list", List),
             new Tuple<string, Action<string>>("exit", Exit),
         };
 
         private static string[][] helpMessages = new string[][]
         {
             new string[] { "help", "prints the help screen", "The 'help' command prints the help screen." },
+            new string[] { "stat", "prints the number of records", "The 'stat' command prints the number of records." },
+            new string[] { "create", "creates a new record in the program serivce." },
+            new string[] { "list", "returns all records from the sevice." },
             new string[] { "exit", "exits the application", "The 'exit' command exits the application." },
         };
 
@@ -42,7 +51,7 @@
                     continue;
                 }
 
-                var index = Array.FindIndex(commands, 0, commands.Length, i => i.Item1.Equals(command, StringComparison.InvariantCultureIgnoreCase));
+                var index = Array.FindIndex(commands, 0, commands.Length, i => i.Item1.Equals(command, StringComparison.OrdinalIgnoreCase));
                 if (index >= 0)
                 {
                     const int parametersIndex = 1;
@@ -67,7 +76,7 @@
         {
             if (!string.IsNullOrEmpty(parameters))
             {
-                var index = Array.FindIndex(helpMessages, 0, helpMessages.Length, i => string.Equals(i[Program.CommandHelpIndex], parameters, StringComparison.InvariantCultureIgnoreCase));
+                var index = Array.FindIndex(helpMessages, 0, helpMessages.Length, i => string.Equals(i[Program.CommandHelpIndex], parameters, StringComparison.OrdinalIgnoreCase));
                 if (index >= 0)
                 {
                     Console.WriteLine(helpMessages[index][Program.ExplanationHelpIndex]);
@@ -88,6 +97,133 @@
             }
 
             Console.WriteLine();
+        }
+
+        private static void Stat(string parameters)
+        {
+            var recordsCount = Service.GetStat();
+            Console.WriteLine($"{recordsCount} record(s).");
+        }
+
+        private static void Create(string parameters)
+        {
+            string[] cr_str = new string[] { "First name: ", "Last name: ", "Date of birth: ", "Income per month: ", "Money: ", "Hometown first letter: " };
+            StringBuilder firstname = new StringBuilder();
+            StringBuilder lastname = new StringBuilder();
+            DateTime date = DateTime.MinValue;
+            short height = 0;
+            decimal money = 0;
+            char letter = ' ';
+            for (int i = 0; i < cr_str.Length; i++)
+            {
+                bool flag = false;
+                do
+                {
+                    Console.Write(cr_str[i]);
+                    switch (i)
+                    {
+                        case 0:
+                            firstname = new StringBuilder();
+                            var c = Console.ReadLine();
+                            firstname.Append(c);
+
+                            if (!firstname.ToString().All(char.IsLetter))
+                            {
+                                Console.WriteLine("Invalid first name.");
+                                flag = true;
+                            }
+                            else
+                            {
+                                flag = false;
+                            }
+
+                            break;
+                        case 1:
+                            lastname = new StringBuilder();
+                            c = Console.ReadLine();
+                            lastname.Append(c);
+
+                            if (!lastname.ToString().All(char.IsLetter))
+                            {
+                                Console.WriteLine("Invalid last name.");
+                                flag = true;
+                            }
+                            else
+                            {
+                                flag = false;
+                            }
+
+                            break;
+                        case 2:
+                            if (DateTime.TryParse(Console.ReadLine(), CultureInfo.CreateSpecificCulture("en-US"), out DateTime result))
+                            {
+                                date = result;
+                                flag = false;
+                            }
+                            else
+                            {
+                                Console.WriteLine("Invalid date.\nCorrect format is: MM/DD/YYYY.");
+                                flag = true;
+                            }
+
+                            break;
+                        case 3:
+                            if (short.TryParse(Console.ReadLine(), out short res))
+                            {
+                                height = res;
+                                flag = false;
+                            }
+                            else
+                            {
+                                Console.WriteLine("Invalid data.");
+                                flag = true;
+                            }
+
+                            break;
+                        case 4:
+                            if (decimal.TryParse(Console.ReadLine(), CultureInfo.CreateSpecificCulture("en-US"), out decimal r))
+                            {
+                                money = r;
+                                flag = false;
+                            }
+                            else
+                            {
+                                Console.WriteLine("Invalid data.");
+                                flag = true;
+                            }
+
+                            break;
+                        case 5:
+                            if (char.TryParse(Console.ReadLine(), out char character) && char.IsLetter(character))
+                            {
+                                letter = character;
+                                flag = false;
+                            }
+                            else
+                            {
+                                Console.WriteLine("Invalid character.");
+                                flag = true;
+                            }
+
+                            break;
+                    }
+                }
+                while (flag);
+            }
+
+            var recordId = Service.CreateRecord(firstname.ToString(), lastname.ToString(), date, height, money, letter);
+            Console.WriteLine($"Record {recordId} is created.");
+        }
+
+        private static void List(string parameters)
+        {
+            for (int i = 0; i < Service.GetStat(); i++)
+            {
+                Console.WriteLine($"#{Service.GetRecords()[i].Id}, {Service.GetRecords()[i].FirstName}, {Service.GetRecords()[i].LastName}," +
+                    $" {Service.GetRecords()[i].DateOfBirth.Year}-{Service.GetRecords()[i].DateOfBirth.ToString("MMM", CultureInfo.CreateSpecificCulture("en-US"))}" +
+                    $"-{Service.GetRecords()[i].DateOfBirth.Day}, ${Service.GetRecords()[i].Income}, ${Service.GetRecords()[i].Money.ToString(CultureInfo.CreateSpecificCulture("en-US"))}," +
+                    $" From {Service.GetRecords()[i].HometownFirstLetter}-Town");
+            }
         }
 
         private static void Exit(string parameters)
