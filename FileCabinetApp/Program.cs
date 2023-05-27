@@ -1,4 +1,7 @@
-﻿namespace FileCabinetApp
+﻿using System.Globalization;
+using System.Text;
+
+namespace FileCabinetApp
 {
     public static class Program
     {
@@ -14,6 +17,7 @@
         {
             new Tuple<string, Action<string>>("help", PrintHelp),
             new Tuple<string, Action<string>>("stat", Stat),
+            new Tuple<string, Action<string>>("create", Create),
             new Tuple<string, Action<string>>("exit", Exit),
         };
 
@@ -21,6 +25,7 @@
         {
             new string[] { "help", "prints the help screen", "The 'help' command prints the help screen." },
             new string[] { "stat", "prints the number of records", "The 'stat' command prints the number of records." },
+            new string[] { "create", "creates a new record in the program serivce." },
             new string[] { "exit", "exits the application", "The 'exit' command exits the application." },
         };
 
@@ -44,7 +49,7 @@
                     continue;
                 }
 
-                var index = Array.FindIndex(commands, 0, commands.Length, i => i.Item1.Equals(command, StringComparison.InvariantCultureIgnoreCase));
+                var index = Array.FindIndex(commands, 0, commands.Length, i => i.Item1.Equals(command, StringComparison.OrdinalIgnoreCase));
                 if (index >= 0)
                 {
                     const int parametersIndex = 1;
@@ -69,7 +74,7 @@
         {
             if (!string.IsNullOrEmpty(parameters))
             {
-                var index = Array.FindIndex(helpMessages, 0, helpMessages.Length, i => string.Equals(i[Program.CommandHelpIndex], parameters, StringComparison.InvariantCultureIgnoreCase));
+                var index = Array.FindIndex(helpMessages, 0, helpMessages.Length, i => string.Equals(i[Program.CommandHelpIndex], parameters, StringComparison.OrdinalIgnoreCase));
                 if (index >= 0)
                 {
                     Console.WriteLine(helpMessages[index][Program.ExplanationHelpIndex]);
@@ -96,6 +101,74 @@
         {
             var recordsCount = Service.GetStat();
             Console.WriteLine($"{recordsCount} record(s).");
+        }
+
+        private static void Create(string parameters)
+        {
+            string[] cr_str = new string[] { "First name: ", "Last name: ", "Date of birth: " };
+            StringBuilder firstname = new StringBuilder();
+            StringBuilder lastname = new StringBuilder();
+            DateTime date = DateTime.MinValue;
+            for (int i = 0; i < cr_str.Length; i++)
+            {
+                bool flag = false;
+                do
+                {
+                    Console.Write(cr_str[i]);
+                    switch (i)
+                    {
+                        case 0:
+                            firstname = new StringBuilder();
+                            var c = Console.ReadLine();
+                            firstname.Append(c);
+
+                            if (!firstname.ToString().All(char.IsLetter))
+                            {
+                                Console.WriteLine("Invalid first name.");
+                                flag = true;
+                            }
+                            else
+                            {
+                                flag = false;
+                            }
+
+                            break;
+                        case 1:
+                            lastname = new StringBuilder();
+                            c = Console.ReadLine();
+                            lastname.Append(c);
+
+                            if (!lastname.ToString().All(char.IsLetter))
+                            {
+                                Console.WriteLine("Invalid last name.");
+                                flag = true;
+                            }
+                            else
+                            {
+                                flag = false;
+                            }
+
+                            break;
+                        case 2:
+                            if (DateTime.TryParse(Console.ReadLine(), CultureInfo.CreateSpecificCulture("en-US"), out DateTime result))
+                            {
+                                date = result;
+                                flag = false;
+                            }
+                            else
+                            {
+                                Console.WriteLine("Invalid date.\nCorrect format is: MM/DD/YYYY.");
+                                flag = true;
+                            }
+
+                            break;
+                    }
+                }
+                while (flag);
+            }
+
+            var recordId = Service.CreateRecord(firstname.ToString(), lastname.ToString(), date);
+            Console.WriteLine($"Record {recordId} is created.");
         }
 
         private static void Exit(string parameters)

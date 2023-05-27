@@ -1,4 +1,4 @@
-namespace FileCabinetApp
+п»їnamespace FileCabinetApp
 {
     public class FileCabinetService
     {
@@ -6,19 +6,34 @@ namespace FileCabinetApp
 
         public int CreateRecord(string firstName, string lastName, DateTime dateOfBirth)
         {
-            // TODO: добавьте реализацию метода
-            return 0;
+            // TODO: РґРѕР±Р°РІСЊС‚Рµ СЂРµР°Р»РёР·Р°С†РёСЋ РјРµС‚РѕРґР°
+            if (string.IsNullOrEmpty(lastName) || string.IsNullOrEmpty(firstName))
+            {
+                throw new ArgumentNullException(nameof(firstName), "something is null");
+            }
+
+            var record = new FileCabinetRecord
+            {
+                Id = this.list.Count + 1,
+                FirstName = firstName,
+                LastName = lastName,
+                DateOfBirth = dateOfBirth,
+            };
+
+            this.list.Add(record);
+
+            return record.Id;
         }
 
         public FileCabinetRecord[] GetRecords()
         {
-            // TODO: добавьте реализацию метода
+            // TODO: РґРѕР±Р°РІСЊС‚Рµ СЂРµР°Р»РёР·Р°С†РёСЋ РјРµС‚РѕРґР°
             return Array.Empty<FileCabinetRecord>();
         }
 
         public int GetStat()
         {
-            // TODO: добавьте реализацию метода
+            // TODO: РґРѕР±Р°РІСЊС‚Рµ СЂРµР°Р»РёР·Р°С†РёСЋ РјРµС‚РѕРґР°
             return this.list.Count;
         }
     }
