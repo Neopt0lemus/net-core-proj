@@ -18,6 +18,7 @@ namespace FileCabinetApp
             new Tuple<string, Action<string>>("help", PrintHelp),
             new Tuple<string, Action<string>>("stat", Stat),
             new Tuple<string, Action<string>>("create", Create),
+            new Tuple<string, Action<string>>("list", List),
             new Tuple<string, Action<string>>("exit", Exit),
         };
 
@@ -26,6 +27,7 @@ namespace FileCabinetApp
             new string[] { "help", "prints the help screen", "The 'help' command prints the help screen." },
             new string[] { "stat", "prints the number of records", "The 'stat' command prints the number of records." },
             new string[] { "create", "creates a new record in the program serivce." },
+            new string[] { "list", "returns all records from the sevice." },
             new string[] { "exit", "exits the application", "The 'exit' command exits the application." },
         };
 
@@ -169,6 +171,16 @@ namespace FileCabinetApp
 
             var recordId = Service.CreateRecord(firstname.ToString(), lastname.ToString(), date);
             Console.WriteLine($"Record {recordId} is created.");
+        }
+
+        private static void List(string parameters)
+        {
+            for (int i = 0; i < Service.GetStat(); i++)
+            {
+                Console.WriteLine($"#{Service.GetRecords()[i].Id}, {Service.GetRecords()[i].FirstName}, {Service.GetRecords()[i].LastName}," +
+                    $" {Service.GetRecords()[i].DateOfBirth.Year}-{Service.GetRecords()[i].DateOfBirth.ToString("MMM", CultureInfo.CreateSpecificCulture("en-US"))}" +
+                    $"-{Service.GetRecords()[i].DateOfBirth.Day}");
+            }
         }
 
         private static void Exit(string parameters)
