@@ -4,7 +4,7 @@
     {
         private readonly List<FileCabinetRecord> list = new List<FileCabinetRecord>();
 
-        public int CreateRecord(string firstName, string lastName, DateTime dateOfBirth)
+        public int CreateRecord(string firstName, string lastName, DateTime dateOfBirth, short income, decimal money, char letter)
         {
             // TODO: добавьте реализацию метода
             if (string.IsNullOrEmpty(lastName) || string.IsNullOrEmpty(firstName))
@@ -18,6 +18,9 @@
                 FirstName = firstName,
                 LastName = lastName,
                 DateOfBirth = dateOfBirth,
+                Income = income,
+                Money = money,
+                HometownFirstLetter = letter,
             };
 
             this.list.Add(record);

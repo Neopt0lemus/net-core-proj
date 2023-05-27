@@ -107,10 +107,13 @@ namespace FileCabinetApp
 
         private static void Create(string parameters)
         {
-            string[] cr_str = new string[] { "First name: ", "Last name: ", "Date of birth: " };
+            string[] cr_str = new string[] { "First name: ", "Last name: ", "Date of birth: ", "Income per month: ", "Money: ", "Hometown first letter: " };
             StringBuilder firstname = new StringBuilder();
             StringBuilder lastname = new StringBuilder();
             DateTime date = DateTime.MinValue;
+            short height = 0;
+            decimal money = 0;
+            char letter = ' ';
             for (int i = 0; i < cr_str.Length; i++)
             {
                 bool flag = false;
@@ -164,12 +167,51 @@ namespace FileCabinetApp
                             }
 
                             break;
+                        case 3:
+                            if (short.TryParse(Console.ReadLine(), out short res))
+                            {
+                                height = res;
+                                flag = false;
+                            }
+                            else
+                            {
+                                Console.WriteLine("Invalid data.");
+                                flag = true;
+                            }
+
+                            break;
+                        case 4:
+                            if (decimal.TryParse(Console.ReadLine(), CultureInfo.CreateSpecificCulture("en-US"), out decimal r))
+                            {
+                                money = r;
+                                flag = false;
+                            }
+                            else
+                            {
+                                Console.WriteLine("Invalid data.");
+                                flag = true;
+                            }
+
+                            break;
+                        case 5:
+                            if (char.TryParse(Console.ReadLine(), out char character) && char.IsLetter(character))
+                            {
+                                letter = character;
+                                flag = false;
+                            }
+                            else
+                            {
+                                Console.WriteLine("Invalid character.");
+                                flag = true;
+                            }
+
+                            break;
                     }
                 }
                 while (flag);
             }
 
-            var recordId = Service.CreateRecord(firstname.ToString(), lastname.ToString(), date);
+            var recordId = Service.CreateRecord(firstname.ToString(), lastname.ToString(), date, height, money, letter);
             Console.WriteLine($"Record {recordId} is created.");
         }
 
@@ -179,7 +221,8 @@ namespace FileCabinetApp
             {
                 Console.WriteLine($"#{Service.GetRecords()[i].Id}, {Service.GetRecords()[i].FirstName}, {Service.GetRecords()[i].LastName}," +
                     $" {Service.GetRecords()[i].DateOfBirth.Year}-{Service.GetRecords()[i].DateOfBirth.ToString("MMM", CultureInfo.CreateSpecificCulture("en-US"))}" +
-                    $"-{Service.GetRecords()[i].DateOfBirth.Day}");
+                    $"-{Service.GetRecords()[i].DateOfBirth.Day}, ${Service.GetRecords()[i].Income}, ${Service.GetRecords()[i].Money.ToString(CultureInfo.CreateSpecificCulture("en-US"))}," +
+                    $" From {Service.GetRecords()[i].HometownFirstLetter}-Town");
             }
         }
 

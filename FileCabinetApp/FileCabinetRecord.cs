@@ -15,5 +15,11 @@
         public string LastName { get; set; }
 
         public DateTime DateOfBirth { get; set; }
+
+        public short Income { get; set; }
+
+        public decimal Money { get; set; }
+
+        public char HometownFirstLetter { get; set; }
     }
 }
