@@ -27,7 +27,7 @@ namespace FileCabinetApp
             new string[] { "help", "prints the help screen", "The 'help' command prints the help screen." },
             new string[] { "stat", "prints the number of records", "The 'stat' command prints the number of records." },
             new string[] { "create", "creates a new record in the program serivce." },
-            new string[] { "list", "returns all records from the sevice." },
+            new string[] { "list", "returns all records from the service." },
             new string[] { "exit", "exits the application", "The 'exit' command exits the application." },
         };
 
@@ -111,7 +111,7 @@ namespace FileCabinetApp
             StringBuilder firstname = new StringBuilder();
             StringBuilder lastname = new StringBuilder();
             DateTime date = DateTime.MinValue;
-            short height = 0;
+            short income = 0;
             decimal money = 0;
             char letter = ' ';
             for (int i = 0; i < cr_str.Length; i++)
@@ -127,7 +127,7 @@ namespace FileCabinetApp
                             var c = Console.ReadLine();
                             firstname.Append(c);
 
-                            if (!firstname.ToString().All(char.IsLetter))
+                            if (!firstname.ToString().All(char.IsLetter) || firstname.Length < 2 || firstname.Length > 60)
                             {
                                 Console.WriteLine("Invalid first name.");
                                 flag = true;
@@ -143,7 +143,7 @@ namespace FileCabinetApp
                             c = Console.ReadLine();
                             lastname.Append(c);
 
-                            if (!lastname.ToString().All(char.IsLetter))
+                            if (!lastname.ToString().All(char.IsLetter) || lastname.Length < 2 || lastname.Length > 60)
                             {
                                 Console.WriteLine("Invalid last name.");
                                 flag = true;
@@ -155,7 +155,9 @@ namespace FileCabinetApp
 
                             break;
                         case 2:
-                            if (DateTime.TryParse(Console.ReadLine(), CultureInfo.CreateSpecificCulture("en-US"), out DateTime result))
+                            DateTime minimal_date = DateTime.Parse("01/01/1950", CultureInfo.CreateSpecificCulture("en-US"));
+                            if (DateTime.TryParse(Console.ReadLine(), CultureInfo.CreateSpecificCulture("en-US"), out DateTime result) && result.Date >= minimal_date
+                                && result.Date <= DateTime.Today)
                             {
                                 date = result;
                                 flag = false;
@@ -170,7 +172,7 @@ namespace FileCabinetApp
                         case 3:
                             if (short.TryParse(Console.ReadLine(), out short res))
                             {
-                                height = res;
+                                income = res;
                                 flag = false;
                             }
                             else
@@ -211,7 +213,7 @@ namespace FileCabinetApp
                 while (flag);
             }
 
-            var recordId = Service.CreateRecord(firstname.ToString(), lastname.ToString(), date, height, money, letter);
+            var recordId = Service.CreateRecord(firstname.ToString(), lastname.ToString(), date, income, money, letter);
             Console.WriteLine($"Record {recordId} is created.");
         }
 
