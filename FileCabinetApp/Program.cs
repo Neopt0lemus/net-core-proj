@@ -18,6 +18,7 @@ namespace FileCabinetApp
             new Tuple<string, Action<string>>("help", PrintHelp),
             new Tuple<string, Action<string>>("stat", Stat),
             new Tuple<string, Action<string>>("create", Create),
+            new Tuple<string, Action<string>>("edit", Edit),
             new Tuple<string, Action<string>>("list", List),
             new Tuple<string, Action<string>>("exit", Exit),
         };
@@ -27,6 +28,7 @@ namespace FileCabinetApp
             new string[] { "help", "prints the help screen", "The 'help' command prints the help screen." },
             new string[] { "stat", "prints the number of records", "The 'stat' command prints the number of records." },
             new string[] { "create", "creates a new record in the program serivce." },
+            new string[] { "edit", "edits a record from the service by id" },
             new string[] { "list", "returns all records from the service." },
             new string[] { "exit", "exits the application", "The 'exit' command exits the application." },
         };
@@ -164,7 +166,7 @@ namespace FileCabinetApp
                             }
                             else
                             {
-                                Console.WriteLine("Invalid date.\nCorrect format is: MM/DD/YYYY.");
+                                Console.WriteLine("Invalid date.\nCorrect format is: MM/DD/YYYY.\nMinimal date is 1950-Jan-01");
                                 flag = true;
                             }
 
@@ -215,6 +217,135 @@ namespace FileCabinetApp
 
             var recordId = Service.CreateRecord(firstname.ToString(), lastname.ToString(), date, income, money, letter);
             Console.WriteLine($"Record {recordId} is created.");
+        }
+
+        private static void Edit(string parameters)
+        {
+            int id = 0;
+            if (int.TryParse(parameters, out int r))
+            {
+                id = r;
+            }
+            else
+            {
+                Console.WriteLine("Invalid id.");
+                return;
+            }
+
+            if (id <= 0 || id > Service.GetStat())
+            {
+                Console.WriteLine($"Record #{id} is not found. Enter a number within the range of the list.");
+                return;
+            }
+
+            string[] cr_str = new string[] { "First name: ", "Last name: ", "Date of birth: ", "Income per month: ", "Money: ", "Hometown first letter: " };
+            StringBuilder firstname = new StringBuilder();
+            StringBuilder lastname = new StringBuilder();
+            DateTime date = DateTime.MinValue;
+            short income = 0;
+            decimal money = 0;
+            char letter = ' ';
+            for (int i = 0; i < cr_str.Length; i++)
+            {
+                bool flag = false;
+                do
+                {
+                    Console.Write(cr_str[i]);
+                    switch (i)
+                    {
+                        case 0:
+                            firstname = new StringBuilder();
+                            var c = Console.ReadLine();
+                            firstname.Append(c);
+
+                            if (!firstname.ToString().All(char.IsLetter) || firstname.Length < 2 || firstname.Length > 60)
+                            {
+                                Console.WriteLine("Invalid first name.");
+                                flag = true;
+                            }
+                            else
+                            {
+                                flag = false;
+                            }
+
+                            break;
+                        case 1:
+                            lastname = new StringBuilder();
+                            c = Console.ReadLine();
+                            lastname.Append(c);
+
+                            if (!lastname.ToString().All(char.IsLetter) || lastname.Length < 2 || lastname.Length > 60)
+                            {
+                                Console.WriteLine("Invalid last name.");
+                                flag = true;
+                            }
+                            else
+                            {
+                                flag = false;
+                            }
+
+                            break;
+                        case 2:
+                            DateTime minimal_date = DateTime.Parse("01/01/1950", CultureInfo.CreateSpecificCulture("en-US"));
+                            if (DateTime.TryParse(Console.ReadLine(), CultureInfo.CreateSpecificCulture("en-US"), out DateTime result) && result.Date >= minimal_date
+                                && result.Date <= DateTime.Today)
+                            {
+                                date = result;
+                                flag = false;
+                            }
+                            else
+                            {
+                                Console.WriteLine("Invalid date.\nCorrect format is: MM/DD/YYYY.\nMinimal date is 1950-Jan-01");
+                                flag = true;
+                            }
+
+                            break;
+                        case 3:
+                            if (short.TryParse(Console.ReadLine(), out short res))
+                            {
+                                income = res;
+                                flag = false;
+                            }
+                            else
+                            {
+                                Console.WriteLine("Invalid data.");
+                                flag = true;
+                            }
+
+                            break;
+                        case 4:
+                            if (decimal.TryParse(Console.ReadLine(), CultureInfo.CreateSpecificCulture("en-US"), out decimal re))
+                            {
+                                money = re;
+                                flag = false;
+                            }
+                            else
+                            {
+                                Console.WriteLine("Invalid data.");
+                                flag = true;
+                            }
+
+                            break;
+                        case 5:
+                            if (char.TryParse(Console.ReadLine(), out char character) && char.IsLetter(character))
+                            {
+                                letter = character;
+                                flag = false;
+                            }
+                            else
+                            {
+                                Console.WriteLine("Invalid character.");
+                                flag = true;
+                            }
+
+                            break;
+                    }
+                }
+                while (flag);
+            }
+
+            Service.EditRecord(id, firstname.ToString(), lastname.ToString(), date, income, money, letter);
+            Console.WriteLine($"Record #{id} is updated.");
         }
 
         private static void List(string parameters)

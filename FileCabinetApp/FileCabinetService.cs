@@ -39,5 +39,20 @@
             // TODO: добавьте реализацию метода
             return this.list.Count;
         }
+
+        public void EditRecord(int id, string firstName, string lastName, DateTime dateOfBirth, short income, decimal money, char letter)
+        {
+            if (id > this.list.Count || id <= 0)
+            {
+                throw new ArgumentException($"#{id} record is not found.");
+            }
+
+            this.list[id - 1].FirstName = firstName;
+            this.list[id - 1].LastName = lastName;
+            this.list[id - 1].DateOfBirth = dateOfBirth;
+            this.list[id - 1].Income = income;
+            this.list[id - 1].Money = money;
+            this.list[id - 1].HometownFirstLetter = letter;
+        }
     }
 }
