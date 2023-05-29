@@ -381,6 +381,18 @@ namespace FileCabinetApp
                     return;
                 }
             }
+            else if (string.Equals(inputs[propertyIndex], "lastname", StringComparison.OrdinalIgnoreCase))
+            {
+                try
+                {
+                    list = Service.FindByLastName(inputs[parameterIndex]).ToList();
+                }
+                catch (Exception e)
+                {
+                    Console.WriteLine($"{e.Message}");
+                    return;
+                }
+            }
             else
             {
                 Console.WriteLine($"There is no property '{inputs[propertyIndex]}'.");

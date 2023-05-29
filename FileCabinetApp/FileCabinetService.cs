@@ -76,5 +76,27 @@
 
             return firstNameList.ToArray();
         }
+
+        public FileCabinetRecord[] FindByLastName(string lastName)
+        {
+            lastName = lastName.Replace("\"", string.Empty);
+            if (string.IsNullOrEmpty(lastName) || string.IsNullOrWhiteSpace(lastName))
+            {
+                throw new ArgumentNullException(nameof(lastName), "Last name is null");
+            }
+
+            if (!lastName.ToString().All(char.IsLetter) || lastName.Length < 2 || lastName.Length > 60)
+            {
+                throw new ArgumentException("Invalid Last name", nameof(lastName));
+            }
+
+            var lastNameList = new List<FileCabinetRecord>();
+            foreach (var record in this.list.Where(x => string.Equals(x.LastName, lastName, StringComparison.OrdinalIgnoreCase)))
+            {
+                lastNameList.Add(record);
+            }
+
+            return lastNameList.ToArray();
+        }
     }
 }
