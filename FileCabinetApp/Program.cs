@@ -1,4 +1,5 @@
 ﻿using System.Globalization;
+using System.Runtime.CompilerServices;
 using System.Text;
 
 namespace FileCabinetApp
@@ -19,6 +20,7 @@ namespace FileCabinetApp
             new Tuple<string, Action<string>>("stat", Stat),
             new Tuple<string, Action<string>>("create", Create),
             new Tuple<string, Action<string>>("edit", Edit),
+            new Tuple<string, Action<string>>("find", Find),
             new Tuple<string, Action<string>>("list", List),
             new Tuple<string, Action<string>>("exit", Exit),
         };
@@ -29,6 +31,7 @@ namespace FileCabinetApp
             new string[] { "stat", "prints the number of records", "The 'stat' command prints the number of records." },
             new string[] { "create", "creates a new record in the program serivce." },
             new string[] { "edit", "edits a record from the service by id" },
+            new string[] { "find", "finds all records according to property and parameter" },
             new string[] { "list", "returns all records from the service." },
             new string[] { "exit", "exits the application", "The 'exit' command exits the application." },
         };
@@ -346,6 +349,64 @@ namespace FileCabinetApp
 
             Service.EditRecord(id, firstname.ToString(), lastname.ToString(), date, income, money, letter);
             Console.WriteLine($"Record #{id} is updated.");
+        }
+
+        private static void Find(string parameters)
+        {
+            if (string.IsNullOrEmpty(parameters) || string.IsNullOrWhiteSpace(parameters))
+            {
+                Console.WriteLine("Invalid paramters. Correct format is: find <propertyName> \"name\" ");
+                return;
+            }
+
+            var inputs = parameters.Split(' ');
+            const int propertyIndex = 0;
+            const int parameterIndex = 1;
+            var list = new List<FileCabinetRecord>();
+            if (inputs.Length < 2)
+            {
+                Console.WriteLine("Invalid paramters. Correct format is: find <propertyName> \"name\" ");
+                return;
+            }
+
+            if (string.Equals(inputs[propertyIndex], "firstname", StringComparison.OrdinalIgnoreCase))
+            {
+                try
+                {
+                    list = Service.FindByFirstName(inputs[parameterIndex]).ToList();
+                }
+                catch (Exception e)
+                {
+                    Console.WriteLine($"{e.Message}");
+                    return;
+                }
+            }
+            else
+            {
+                Console.WriteLine($"There is no property '{inputs[propertyIndex]}'.");
+                return;
+            }
+
+            if (!(inputs[parameterIndex].StartsWith('\"') && inputs[parameterIndex].EndsWith('\"')))
+            {
+                Console.WriteLine("Invalid paramters. Correct format is: find <propertyName> \"name\" ");
+                return;
+            }
+
+            if (list.Count == 0)
+            {
+                Console.WriteLine($"No records with name {inputs[parameterIndex]} were found.");
+            }
+            else
+            {
+                foreach (var item in list)
+                {
+                    Console.WriteLine($"#{item.Id}, {item.FirstName}, {item.LastName}," +
+                    $" {item.DateOfBirth.Year}-{item.DateOfBirth.ToString("MMM", CultureInfo.CreateSpecificCulture("en-US"))}" +
+                    $"-{item.DateOfBirth.Day}, ${item.Income}, ${item.Money.ToString(CultureInfo.CreateSpecificCulture("en-US"))}," +
+                    $" From {item.HometownFirstLetter}-Town");
+                }
+            }
         }
 
         private static void List(string parameters)

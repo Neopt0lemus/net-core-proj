@@ -54,5 +54,27 @@
             this.list[id - 1].Money = money;
             this.list[id - 1].HometownFirstLetter = letter;
         }
+
+        public FileCabinetRecord[] FindByFirstName(string firstName)
+        {
+            firstName = firstName.Replace("\"", string.Empty);
+            if (string.IsNullOrEmpty(firstName) || string.IsNullOrWhiteSpace(firstName))
+            {
+                throw new ArgumentNullException(nameof(firstName), "First name is null");
+            }
+
+            if (!firstName.ToString().All(char.IsLetter) || firstName.Length < 2 || firstName.Length > 60)
+            {
+                throw new ArgumentException("Invalid first name", nameof(firstName));
+            }
+
+            var firstNameList = new List<FileCabinetRecord>();
+            foreach (var record in this.list.Where(x => string.Equals(x.FirstName, firstName, StringComparison.OrdinalIgnoreCase)))
+            {
+                firstNameList.Add(record);
+            }
+
+            return firstNameList.ToArray();
+        }
     }
 }
