@@ -393,6 +393,18 @@ namespace FileCabinetApp
                     return;
                 }
             }
+            else if (string.Equals(inputs[propertyIndex], "dateofbirth", StringComparison.OrdinalIgnoreCase))
+            {
+                try
+                {
+                    list = Service.FindByDateOfBirth(inputs[parameterIndex]).ToList();
+                }
+                catch (Exception e)
+                {
+                    Console.WriteLine($"{e.Message}");
+                    return;
+                }
+            }
             else
             {
                 Console.WriteLine($"There is no property '{inputs[propertyIndex]}'.");
@@ -401,13 +413,13 @@ namespace FileCabinetApp
 
             if (!(inputs[parameterIndex].StartsWith('\"') && inputs[parameterIndex].EndsWith('\"')))
             {
-                Console.WriteLine("Invalid paramters. Correct format is: find <propertyName> \"name\" ");
+                Console.WriteLine("Invalid paramters. Correct format is: find <propertyName> \"parameter\" ");
                 return;
             }
 
             if (list.Count == 0)
             {
-                Console.WriteLine($"No records with name {inputs[parameterIndex]} were found.");
+                Console.WriteLine($"No records with {inputs[propertyIndex]} {inputs[parameterIndex]} were found.");
             }
             else
             {

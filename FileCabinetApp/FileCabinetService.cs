@@ -1,4 +1,6 @@
-﻿namespace FileCabinetApp
+﻿using System.Globalization;
+
+namespace FileCabinetApp
 {
     public class FileCabinetService
     {
@@ -57,7 +59,7 @@
 
         public FileCabinetRecord[] FindByFirstName(string firstName)
         {
-            firstName = firstName.Replace("\"", string.Empty);
+            firstName = firstName.Replace("\"", string.Empty, StringComparison.OrdinalIgnoreCase);
             if (string.IsNullOrEmpty(firstName) || string.IsNullOrWhiteSpace(firstName))
             {
                 throw new ArgumentNullException(nameof(firstName), "First name is null");
@@ -79,7 +81,7 @@
 
         public FileCabinetRecord[] FindByLastName(string lastName)
         {
-            lastName = lastName.Replace("\"", string.Empty);
+            lastName = lastName.Replace("\"", string.Empty, StringComparison.OrdinalIgnoreCase);
             if (string.IsNullOrEmpty(lastName) || string.IsNullOrWhiteSpace(lastName))
             {
                 throw new ArgumentNullException(nameof(lastName), "Last name is null");
@@ -92,6 +94,30 @@
 
             var lastNameList = new List<FileCabinetRecord>();
             foreach (var record in this.list.Where(x => string.Equals(x.LastName, lastName, StringComparison.OrdinalIgnoreCase)))
+            {
+                lastNameList.Add(record);
+            }
+
+            return lastNameList.ToArray();
+        }
+
+        public FileCabinetRecord[] FindByDateOfBirth(string date)
+        {
+            date = date.Replace("\"", string.Empty, StringComparison.OrdinalIgnoreCase);
+            DateTime minimal_date = DateTime.Parse("01/01/1950", CultureInfo.CreateSpecificCulture("en-US"));
+            if (string.IsNullOrEmpty(date) || string.IsNullOrWhiteSpace(date))
+            {
+                throw new ArgumentNullException(nameof(date), "Date is null");
+            }
+
+            if (!(DateTime.TryParse(date, CultureInfo.CreateSpecificCulture("en-US"), out DateTime result) && result.Date >= minimal_date
+                                && result.Date <= DateTime.Today))
+            {
+                throw new ArgumentException("Invalid date", nameof(date));
+            }
+
+            var lastNameList = new List<FileCabinetRecord>();
+            foreach (var record in this.list.Where(x => DateTime.Equals(x.DateOfBirth, result.Date)))
             {
                 lastNameList.Add(record);
             }
