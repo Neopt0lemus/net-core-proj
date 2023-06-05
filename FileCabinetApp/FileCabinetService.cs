@@ -5,10 +5,11 @@ namespace FileCabinetApp
     public class FileCabinetService
     {
         private readonly List<FileCabinetRecord> list = new List<FileCabinetRecord>();
+        private readonly Dictionary<string, List<FileCabinetRecord>> firstNameDictionary = new Dictionary<string, List<FileCabinetRecord>>();
+        private readonly Dictionary<string, List<FileCabinetRecord>> lastNameDictionary = new Dictionary<string, List<FileCabinetRecord>>();
 
         public int CreateRecord(string firstName, string lastName, DateTime dateOfBirth, short income, decimal money, char letter)
         {
-            // TODO: добавьте реализацию метода
             if (string.IsNullOrEmpty(lastName) || string.IsNullOrEmpty(firstName))
             {
                 throw new ArgumentNullException(nameof(firstName), "something is null");
@@ -24,6 +25,23 @@ namespace FileCabinetApp
                 Money = money,
                 HometownFirstLetter = letter,
             };
+            if (this.firstNameDictionary.TryGetValue(record.FirstName.ToLowerInvariant(), out List<FileCabinetRecord> firstNameMatchList))
+            {
+                firstNameMatchList.Add(record);
+            }
+            else
+            {
+                this.firstNameDictionary.Add(record.FirstName.ToLowerInvariant(), new List<FileCabinetRecord> { record });
+            }
+
+            if (this.lastNameDictionary.TryGetValue(record.LastName.ToLowerInvariant(), out List<FileCabinetRecord> lastNameMatchList))
+            {
+                lastNameMatchList.Add(record);
+            }
+            else
+            {
+                this.lastNameDictionary.Add(record.LastName.ToLowerInvariant(), new List<FileCabinetRecord> { record });
+            }
 
             this.list.Add(record);
 
@@ -32,13 +50,11 @@ namespace FileCabinetApp
 
         public FileCabinetRecord[] GetRecords()
         {
-            // TODO: добавьте реализацию метода
             return this.list.ToArray();
         }
 
         public int GetStat()
         {
-            // TODO: добавьте реализацию метода
             return this.list.Count;
         }
 
@@ -49,12 +65,47 @@ namespace FileCabinetApp
                 throw new ArgumentException($"#{id} record is not found.");
             }
 
+            if (this.firstNameDictionary.TryGetValue(this.list[id - 1].FirstName.ToLowerInvariant(), out List<FileCabinetRecord> firstNameMatchList))
+            {
+                firstNameMatchList.Remove(this.list[id - 1]);
+                if (firstNameMatchList.Count == 0)
+                {
+                    this.firstNameDictionary.Remove(this.list[id - 1].FirstName.ToLowerInvariant());
+                }
+            }
+
+            if (this.lastNameDictionary.TryGetValue(this.list[id - 1].LastName.ToLowerInvariant(), out List<FileCabinetRecord> lastNameMatchList))
+            {
+                lastNameMatchList.Remove(this.list[id - 1]);
+                if (lastNameMatchList.Count == 0)
+                {
+                    this.lastNameDictionary.Remove(this.list[id - 1].LastName.ToLowerInvariant());
+                }
+            }
+
             this.list[id - 1].FirstName = firstName;
             this.list[id - 1].LastName = lastName;
             this.list[id - 1].DateOfBirth = dateOfBirth;
             this.list[id - 1].Income = income;
             this.list[id - 1].Money = money;
             this.list[id - 1].HometownFirstLetter = letter;
+            if (this.firstNameDictionary.TryGetValue(this.list[id - 1].FirstName.ToLowerInvariant(), out List<FileCabinetRecord> editedFirstNameMatchList))
+            {
+                editedFirstNameMatchList.Add(this.list[id - 1]);
+            }
+            else
+            {
+                this.firstNameDictionary.Add(firstName.ToLowerInvariant(), new List<FileCabinetRecord> { this.list[id - 1] });
+            }
+
+            if (this.lastNameDictionary.TryGetValue(this.list[id - 1].LastName.ToLowerInvariant(), out List<FileCabinetRecord> editedLastNameMatchList))
+            {
+                editedLastNameMatchList.Add(this.list[id - 1]);
+            }
+            else
+            {
+                this.lastNameDictionary.Add(lastName.ToLowerInvariant(), new List<FileCabinetRecord> { this.list[id - 1] });
+            }
         }
 
         public FileCabinetRecord[] FindByFirstName(string firstName)
@@ -70,13 +121,12 @@ namespace FileCabinetApp
                 throw new ArgumentException("Invalid first name", nameof(firstName));
             }
 
-            var firstNameList = new List<FileCabinetRecord>();
-            foreach (var record in this.list.Where(x => string.Equals(x.FirstName, firstName, StringComparison.OrdinalIgnoreCase)))
+            if (this.firstNameDictionary.TryGetValue(firstName.ToLowerInvariant(), out List<FileCabinetRecord> firstNameMatchList))
             {
-                firstNameList.Add(record);
+                return firstNameMatchList.ToArray();
             }
 
-            return firstNameList.ToArray();
+            return Array.Empty<FileCabinetRecord>();
         }
 
         public FileCabinetRecord[] FindByLastName(string lastName)
@@ -92,13 +142,17 @@ namespace FileCabinetApp
                 throw new ArgumentException("Invalid Last name", nameof(lastName));
             }
 
-            var lastNameList = new List<FileCabinetRecord>();
-            foreach (var record in this.list.Where(x => string.Equals(x.LastName, lastName, StringComparison.OrdinalIgnoreCase)))
+            if (this.lastNameDictionary.TryGetValue(lastName.ToLowerInvariant(), out List<FileCabinetRecord> lastNameMatchList))
             {
-                lastNameList.Add(record);
+                return lastNameMatchList.ToArray();
             }
+            //var lastNameList = new List<FileCabinetRecord>();
+            //foreach (var record in this.list.Where(x => string.Equals(x.LastName, lastName, StringComparison.OrdinalIgnoreCase)))
+            //{
+            //    lastNameList.Add(record);
+            //}
 
-            return lastNameList.ToArray();
+            return Array.Empty<FileCabinetRecord>();
         }
 
         public FileCabinetRecord[] FindByDateOfBirth(string date)
