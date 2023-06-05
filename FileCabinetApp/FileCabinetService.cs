@@ -7,6 +7,7 @@ namespace FileCabinetApp
         private readonly List<FileCabinetRecord> list = new List<FileCabinetRecord>();
         private readonly Dictionary<string, List<FileCabinetRecord>> firstNameDictionary = new Dictionary<string, List<FileCabinetRecord>>();
         private readonly Dictionary<string, List<FileCabinetRecord>> lastNameDictionary = new Dictionary<string, List<FileCabinetRecord>>();
+        private readonly Dictionary<DateTime, List<FileCabinetRecord>> dateOfBirthDictionary = new Dictionary<DateTime, List<FileCabinetRecord>>();
 
         public int CreateRecord(string firstName, string lastName, DateTime dateOfBirth, short income, decimal money, char letter)
         {
@@ -41,6 +42,15 @@ namespace FileCabinetApp
             else
             {
                 this.lastNameDictionary.Add(record.LastName.ToLowerInvariant(), new List<FileCabinetRecord> { record });
+            }
+
+            if (this.dateOfBirthDictionary.TryGetValue(record.DateOfBirth, out List<FileCabinetRecord> dateOfBirthMatchList))
+            {
+                dateOfBirthMatchList.Add(record);
+            }
+            else
+            {
+                this.dateOfBirthDictionary.Add(record.DateOfBirth, new List<FileCabinetRecord> { record });
             }
 
             this.list.Add(record);
@@ -83,6 +93,15 @@ namespace FileCabinetApp
                 }
             }
 
+            if (this.dateOfBirthDictionary.TryGetValue(this.list[id - 1].DateOfBirth, out List<FileCabinetRecord> dateOfBirthMatchList))
+            {
+                dateOfBirthMatchList.Remove(this.list[id - 1]);
+                if (dateOfBirthMatchList.Count == 0)
+                {
+                    this.dateOfBirthDictionary.Remove(this.list[id - 1].DateOfBirth);
+                }
+            }
+
             this.list[id - 1].FirstName = firstName;
             this.list[id - 1].LastName = lastName;
             this.list[id - 1].DateOfBirth = dateOfBirth;
@@ -105,6 +124,15 @@ namespace FileCabinetApp
             else
             {
                 this.lastNameDictionary.Add(lastName.ToLowerInvariant(), new List<FileCabinetRecord> { this.list[id - 1] });
+            }
+
+            if (this.dateOfBirthDictionary.TryGetValue(this.list[id - 1].DateOfBirth, out List<FileCabinetRecord> editedDateOfBirthMatchList))
+            {
+                editedDateOfBirthMatchList.Add(this.list[id - 1]);
+            }
+            else
+            {
+                this.dateOfBirthDictionary.Add(dateOfBirth, new List<FileCabinetRecord> { this.list[id - 1] });
             }
         }
 
@@ -146,11 +174,6 @@ namespace FileCabinetApp
             {
                 return lastNameMatchList.ToArray();
             }
-            //var lastNameList = new List<FileCabinetRecord>();
-            //foreach (var record in this.list.Where(x => string.Equals(x.LastName, lastName, StringComparison.OrdinalIgnoreCase)))
-            //{
-            //    lastNameList.Add(record);
-            //}
 
             return Array.Empty<FileCabinetRecord>();
         }
@@ -169,14 +192,20 @@ namespace FileCabinetApp
             {
                 throw new ArgumentException("Invalid date", nameof(date));
             }
-
-            var lastNameList = new List<FileCabinetRecord>();
-            foreach (var record in this.list.Where(x => DateTime.Equals(x.DateOfBirth, result.Date)))
+            else
             {
-                lastNameList.Add(record);
+                if (this.dateOfBirthDictionary.TryGetValue(result.Date, out List<FileCabinetRecord> dateOfBirthMatchList))
+                {
+                    return dateOfBirthMatchList.ToArray();
+                }
             }
+            //var lastNameList = new List<FileCabinetRecord>();
+            //foreach (var record in this.list.Where(x => DateTime.Equals(x.DateOfBirth, result.Date)))
+            //{
+            //    lastNameList.Add(record);
+            //}
 
-            return lastNameList.ToArray();
+            return Array.Empty<FileCabinetRecord>();
         }
     }
 }
